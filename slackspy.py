@@ -3,6 +3,7 @@ from datetime import datetime
 import time
 import json
 import os
+import requests
 
 def main():
   with open(os.path.join(os.path.dirname(__file__), 'token.txt')) as F:
@@ -15,7 +16,11 @@ def main():
   observations = []
 
   while True:
-    status = sc.api_call('users.list', presence=1)
+    try:
+      status = sc.api_call('users.list', presence=1)
+    except requests.RequestException:
+      time.sleep(sleep_period)
+      continue
     status = dict([(u['name'], u['presence']) for u in status['members'] if 'presence' in u])
     timestamp = int(time.time())
     observations.append({ 'status': status, 'time': timestamp })
